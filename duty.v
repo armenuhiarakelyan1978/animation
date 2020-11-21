@@ -1,5 +1,6 @@
 `include "tim.v"
 module duty(output  reg [3:0]duty_cycle,
+	output reg ready,
 	input clk,
 	input rst,
 	input start);
@@ -49,6 +50,7 @@ if( en == 1 && rst == 0 && duty_cycle <= 10 )begin
 		if (duty_cycle == 4'd0)begin
 		    duty_state <= 1'b1;
 		    en <= 0;
+		    ready <= 1;
 		end 
 	end
 end
@@ -57,7 +59,8 @@ begin
 	duty_cycle <= 4'd0;
 	duty_state <= 1'b1;
         trig  <= 1;
-        trig1 <= 1;	
+        trig1 <= 1;
+	ready <= 0;
 end
 end
 

@@ -3,15 +3,15 @@ module stm2
 #(parameter N = 4)
 (output  [7:0] out,
 	input clk,
-	input en,
 	input rst
 );
 
 reg [7:0] m_out;
 reg [7:0] out_r;
+reg en;
 reg start;
 reg [2:0] state, next_state;
-reg [4:0] cnt; 
+reg [4:0] cnt;
 
 localparam S0 = 3'b000;
 localparam S1 = 3'b001;
@@ -22,52 +22,71 @@ localparam S5 = 3'b101;
 localparam S6 = 3'b110;
 localparam S7 = 3'b111;
 
-cont controler(.clk(clk), .rst(rst),.ready(ready), .start(start),.clk_out(clk_out));
+
+cont controler(.clk(clk),
+.rst(rst),.ready(ready), 
+.start(start),.clk_out(clk_out));
 
 
+
+always@(posedge clk or posedge rst)
+begin
+	if(rst)begin
+		state <= S0;
+	end
+	else begin
+		state <= next_state;
+	end
+end
 always@(state)
 begin
-	case(state)	
+	case(state)
 		S0:begin
 			out_r = 8'b00000001;
+			en = 1'b1;
 		end
 		S1:begin
 			out_r = 8'b00000010;
+			en = 1'b1;
 		end
 		S2:begin
 			out_r = 8'b00000100;
+			en = 1'b1;
 		end
 		S3:begin
 			out_r = 8'b00001000;
+			en = 1'b1;
 		end
 		S4:begin
 			out_r = 8'b00010000;
+			en = 1'b1;
 		end
 		S5:begin
 			out_r = 8'b00100000;
+			en = 1'b1;
 		end
 		S6:begin
 			out_r = 8'b01000000;
+			en = 1'b1;
 		end
 		S7:begin
 			out_r = 8'b10000000;
+			en = 1'b1;
 		end
-		default:begin
-			out_r = 8'b00000000;
-		end
+			
 	endcase
 end
 
 always@(*)
 begin
 	case(state)
-
+		
 		S0:begin
-			if(ready == 1)begin
-				next_state = S1;
+			if( ready == 1)begin
+			next_state = S1;
 			end
 			else begin
-				next_state = S0;
+			next_state = S0;
 			end
 		end
 		S1:begin
@@ -134,29 +153,35 @@ end
 always@(*)
 begin
 	if(rst)begin
-		start = 0;	
-
+		start = 0;
 	end 
-	else  if (state == S0 || state == S1 || state == S2 
-		|| state == S3 || state == S4 || state == S5
-	|| state == S6 || state == S7) begin 
-	start = 1;
-
-	if(cnt == 5'd20)begin
-		cnt = 5'd0;
-                start = 1'b0;	
-	end
-        end
+	else 
+	   begin start = 1;
+	       if(cnt == 2)begin
+		       start = 0;
+	       end
+        end 	       
+        
 end
+
+
 always@(posedge clk or posedge rst)
 begin
-	if(cnt < 5'd20)begin
-		cnt <= cnt + 5'd1;
+	if(rst)begin
+		cnt <= 0;
 	end
-	else begin
-		cnt <=5'd0;
+	else if(cnt  <  3) begin
+		cnt <=cnt + 1;
+	end
+	else begin 
+		cnt <= 0;
 	end
 end
+
+
+
+
+
 assign out = en ? m_out : 8'bx;
 always@(*)
 	case(state)

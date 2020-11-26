@@ -1,4 +1,4 @@
-`include "cont.v"
+//`include "cont.v"
 module stm2
 #(parameter N = 4)
 (output  [7:0] out,
